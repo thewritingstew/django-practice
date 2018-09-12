@@ -8,6 +8,7 @@ from django.shortcuts import render # added for step 3? in tutorial
 from django.http import HttpResponseRedirect # added for step 4 in tutorial
 from django.urls import reverse # added for step 4 in tutorial
 from django.views import generic # added for step 4 in tutorial
+from django.utils import timezone
 
 from .models import Question, Choice
 
@@ -23,6 +24,12 @@ class IndexView(generic.ListView):
 class DetailView(generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
+
+    def get_queryset(self):
+        """
+        Exclude detail for questions that have pub_date in future.
+        """
+        return Question.objects.filter(pub_date__lte=timezone.now())
 
 
 class ResultsView(generic.DetailView):
