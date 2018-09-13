@@ -45,7 +45,6 @@ class QuestionModelTests(TestCase):
         recent_question = Question(pub_date=time)
         self.assertIs(recent_question.was_published_recently(), True)
 
-
 class QuestionIndexViewTests(TestCase):
 
     def test_response_status_code(self):
@@ -119,7 +118,6 @@ class QuestionDetailViewTests(TestCase):
         a 404 not found response from the server.
         """
         future_question = create_question('Future question.', 1)
-        # reverse('polls:detail', args = (question.id,))
         url = reverse('polls:detail', args = (future_question.id, ))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
@@ -132,6 +130,33 @@ class QuestionDetailViewTests(TestCase):
         # setup
         past_question = create_question('Past question.', -1)
         url = reverse('polls:detail', args = (past_question.id, ))
+        response = self.client.get(url)
+        # tests
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, past_question.question_text)
+
+class QuestionResultsViewTests(TestCase):
+    """
+    Tests for the Results view of my django tutorial site
+    """
+    def test_future_question(self):
+        """
+        The results view of a question with pub_date in the future should
+        return a 404 not found status code.
+        """
+        future_question = create_question('Future question.', 1)
+        url = reverse('polls:results', args = (future_question.id, ))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_past_question(self):
+        """
+        The results view of a question with pub_date in the past should
+        return a 200 status code and contain the question text
+        """
+        # setup
+        past_question = create_question('Past question.', -1)
+        url = reverse('polls:results', args = (past_question.id, ))
         response = self.client.get(url)
         # tests
         self.assertEqual(response.status_code, 200)
