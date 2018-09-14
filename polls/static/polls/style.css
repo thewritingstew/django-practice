@@ -3,3 +3,7 @@
 li a {
   color: green;
 }
+
+body {
+  background: white url("images/star_eyes.jpg") no-repeat;
+}
