@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import Question, Choice
 
-class ChoiceInline(admin.StackedInline):
+class ChoiceInline(admin.TabularInline):
     """Sets up the admin for choices to be inline with the Question the
     choice belongs to, and shows 3 extra slots for choices.
     """
