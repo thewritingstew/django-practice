@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import Question
+from .models import Question, Choice
 
 def create_question(question_text, days):
     """
@@ -14,6 +14,14 @@ def create_question(question_text, days):
     """
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text, pub_date=time)
+
+def create_choice(choice_text, question):
+    """
+    Create a choice for a question.
+    """
+    return Choice.objects.create(choice_text=choice_text,
+                                    question=question,
+                                    votes=0)
 
 class QuestionModelTests(TestCase):
 
@@ -46,6 +54,30 @@ class QuestionModelTests(TestCase):
         self.assertIs(recent_question.was_published_recently(), True)
 
 class QuestionIndexViewTests(TestCase):
+
+    def test_question_with_no_choices(self):
+        """
+        Check that a question with no choices does not show up on the index
+        page.
+        """
+        create_question('does this question have choices?', -5)
+        response = self.client.get(reverse('polls:index'))
+
+        # test that the question doesn't show up, text hint shows up
+#        self.assertContains(response, "No polls are available.")
+        self.assertQuerysetEqual(response.context['latest_question_list'], [])
+
+    def test_question_with_choices(self):
+        """
+        Check that a question with choices shows up on the index page.
+        """
+        question1 = create_question('Does this question have choices?', -5)
+        create_choice('yes it does', question1)
+        response = self.client.get(reverse('polls:index'))
+
+        # test that the question shows up
+        self.assertQuerysetEqual(response.context['latest_question_list'],
+                        ['<Question: Does this question have choices?>'])
 
     def test_response_status_code(self):
         """
