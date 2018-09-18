@@ -11,6 +11,7 @@ from django.views import generic # added for step 4 in tutorial
 from django.utils import timezone # added for step 5 in tutorial
 
 from .models import Question, Choice
+from django.db.models import Count # added for my bonus filter on choices - iss018
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
@@ -21,8 +22,9 @@ class IndexView(generic.ListView):
         Return the last five published questions, not including those to be
         published in the future.
         """
-        return Question.objects.filter(
-            pub_date__lte=timezone.now()
+        return Question.objects.annotate(num_choices=Count('choice')).filter(
+            pub_date__lte=timezone.now(),
+            num_choices__gt=0
         ).order_by('-pub_date')[:5]
 
 
@@ -32,7 +34,7 @@ class DetailView(generic.DetailView):
 
     def get_queryset(self):
         """
-        Exclude detail for questions that have pub_date in future.
+        Return detail only for questions that have pub_date earlier than now.
         """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
@@ -43,7 +45,7 @@ class ResultsView(generic.DetailView):
 
     def get_queryset(self):
         """
-        Exclude results for questions with pub_date in future.
+        Return results only for questions with pub_date earlier than now.
         """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
