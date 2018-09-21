@@ -4,6 +4,11 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
+# imports for selenium testing
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
 from .models import Question, Choice
 
 def create_question(question_text, days):
@@ -64,7 +69,7 @@ class QuestionIndexViewTests(TestCase):
         response = self.client.get(reverse('polls:index'))
 
         # test that the question doesn't show up, text hint shows up
-#        self.assertContains(response, "No polls are available.")
+        self.assertContains(response, "No polls are available.")
         self.assertQuerysetEqual(response.context['latest_question_list'], [])
 
     def test_question_with_choices(self):
@@ -193,3 +198,22 @@ class QuestionResultsViewTests(TestCase):
         # tests
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, past_question.question_text)
+
+class MySeleniumTests(StaticLiveServerTestCase):
+
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(20)
+
+    def tearDown(self):
+        pass
+
+    def test_admin_login(self):
+        driver = self.driver
+        driver.get('%s%s' % (self.live_server_url, '/admin'))
+        username_input = driver.find_element_by_id('id_username')
+        username_input.send_keys("admin")
+        password_input = driver.find_element_by_id('id_password')
+        password_input.send_keys("admin")
+        driver.find_element_by_xpath('//input[@value="Log in"]').click()
+        assert driver.find_elements_by_css_selector("content-main")
