@@ -9,6 +9,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+from django.contrib.auth.models import User
 from .models import Question, Choice
 
 def create_question(question_text, days):
@@ -202,11 +203,15 @@ class QuestionResultsViewTests(TestCase):
 class MySeleniumTests(StaticLiveServerTestCase):
 
     def setUp(self):
+        User.objects.create_superuser(username='admin',
+                                      password='pw',
+                                      email='exam@ple.com')
         self.driver = webdriver.Chrome()
-        self.driver.implicitly_wait(20)
+        self.driver.implicitly_wait(5)
 
     def tearDown(self):
-        pass
+        self.driver.implicitly_wait(5)
+        self.driver.quit()
 
     def test_admin_login(self):
         driver = self.driver
@@ -214,6 +219,6 @@ class MySeleniumTests(StaticLiveServerTestCase):
         username_input = driver.find_element_by_id('id_username')
         username_input.send_keys("admin")
         password_input = driver.find_element_by_id('id_password')
-        password_input.send_keys("admin")
+        password_input.send_keys("pw")
         driver.find_element_by_xpath('//input[@value="Log in"]').click()
-        assert driver.find_elements_by_css_selector("content-main")
+        driver.find_elements_by_css_selector("content-main")
