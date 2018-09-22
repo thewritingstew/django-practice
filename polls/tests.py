@@ -207,10 +207,9 @@ class MySeleniumTests(StaticLiveServerTestCase):
                                       password='pw',
                                       email='exam@ple.com')
         self.driver = webdriver.Chrome()
-        self.driver.implicitly_wait(5)
+        self.driver.implicitly_wait(15)
 
     def tearDown(self):
-        self.driver.implicitly_wait(5)
         self.driver.quit()
 
     def test_admin_login(self):
@@ -221,4 +220,4 @@ class MySeleniumTests(StaticLiveServerTestCase):
         password_input = driver.find_element_by_id('id_password')
         password_input.send_keys("pw")
         driver.find_element_by_xpath('//input[@value="Log in"]').click()
-        driver.find_elements_by_css_selector("content-main")
+        self.assertIn("administration | Dj", self.driver.title)
